@@ -1,0 +1,80 @@
+def calculate_grade(score):
+    if score >= 70:
+        return 'A'
+    elif score >= 60:
+        return 'B'
+    elif score >= 50:
+        return 'C'
+    elif score >= 45:
+        return 'D'
+    else:
+        return 'F'
+
+def get_valid_score(subject_name):
+    while True:
+        try:
+            score = float(input(f"  Enter score for {subject_name}: "))
+            if 0 <= score <= 100:
+                return score
+            else:
+                print("  Invalid score! Score must be between 0 and 100. Try again.")
+        except ValueError:
+            print("  Invalid input! Please enter a numerical value.")
+
+students_data = [] #create empty list to store students profile
+subjects = ["Mathematics", "English", "Physics", "Chemistry"]
+
+print(" Student Details ")
+for i in range(5):
+    name = input(f"\nEnter the name of student {i+1}: ").strip() #get student names and trim unwanted white spaces
+    scores = {} #save subject to score pairing for each student
+    
+    # Loop through the 4 subjects, validate input, and insert the score value into the student's personal scores 
+    for subject in subjects:
+        scores[subject] = get_valid_score(subject)
+
+    # Package the name string and score dictionary into a structured master list    
+    students_data.append({
+        "name": name,
+        "scores": scores
+    })
+
+print("\n--- Generating Analysis Reports ---\n")
+
+total_class_average = 0
+
+for student in students_data:
+    student_scores = student["scores"].values() #Extract only the numerical score figures from the nested dictionary
+    total = sum(student_scores) # use Python's native summation method to sum the 4 scores
+    average = total / len(subjects) # get personal average
+    
+    student["total"] = total
+    student["average"] = average
+    student["final_grade"] = calculate_grade(average)
+    
+    total_class_average += average
+
+class_average = total_class_average / len(students_data)
+
+highest_student = max(students_data, key=lambda x: x["average"]) # use key sorting filter to scan the data list to get the record with the maximum average value
+
+failed_students = []
+for student in students_data:
+    failed_count = 0
+    for score in student["scores"].values():
+        if score < 45:
+            failed_count += 1
+    if failed_count >= 2:
+        failed_students.append(student["name"])
+
+sorted_students = sorted(students_data, key=lambda x: x["average"], reverse=True) #sort the average score in descending order
+
+print(f"Class Average: {class_average:.2f}")
+print(f"Highest Performing Student: {highest_student['name']} (Average: {highest_student['average']:.2f})")
+print(f"Students who failed at least 2 subjects: {', '.join(failed_students) if failed_students else 'None'}\n")
+
+print("Ranked Student Performance (Descending Order):")
+print(f"{'Name':<15}{'Total':<10}{'Average':<10}{'Grade':<5}") # do layout formatting of columns using whitespace boundaries (eg. <15 characters wide) 
+print("-" * 42)
+for student in sorted_students:
+    print(f"{student['name']:<15}{student['total']:<10.2f}{student['average']:<10.2f}{student['final_grade']:<5}")
